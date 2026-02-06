@@ -8,9 +8,15 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::latest()->paginate(15);
+        $query = Category::withCount('produits');
+
+        if ($request->filled('search')) {
+            $query->where('nom', 'like', '%' . $request->search . '%');
+        }
+
+        $categories = $query->latest()->paginate(15)->withQueryString();
         return view('categories.index', compact('categories'));
     }
 
@@ -79,5 +85,26 @@ class CategoryController extends Controller
 
         return redirect()->route('categories.index')
             ->with('success', 'Catégorie supprimée avec succès.');
+    }
+
+    // Export methods
+    public function exportPrint(Request $request)
+    {
+        $query = Category::withCount('produits');
+
+        if ($request->filled('search')) {
+            $query->where('nom', 'like', '%' . $request->search . '%');
+        }
+
+        $categories = $query->latest()->get();
+        $filters = $request->only(['search']);
+
+        return view('categories.export-print', compact('categories', 'filters'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        return redirect()->route('categories.export.print', $request->all())
+            ->with('info', 'Utilisez Ctrl+P puis "Enregistrer en PDF" pour télécharger.');
     }
 }

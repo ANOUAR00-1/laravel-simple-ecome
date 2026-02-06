@@ -7,9 +7,22 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::latest()->paginate(15);
+        $query = Client::query();
+
+        // Filter by name
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nom', 'like', '%' . $search . '%')
+                    ->orWhere('prenom', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('telephone', 'like', '%' . $search . '%');
+            });
+        }
+
+        $clients = $query->latest()->paginate(15)->withQueryString();
         return view('clients.index', compact('clients'));
     }
 
@@ -67,5 +80,31 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')
             ->with('success', 'Client supprimé avec succès.');
+    }
+
+    // Export methods
+    public function exportPrint(Request $request)
+    {
+        $query = Client::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nom', 'like', '%' . $search . '%')
+                    ->orWhere('prenom', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        $clients = $query->latest()->get();
+        $filters = $request->only(['search']);
+
+        return view('clients.export-print', compact('clients', 'filters'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        return redirect()->route('clients.export.print', $request->all())
+            ->with('info', 'Utilisez Ctrl+P puis "Enregistrer en PDF" pour télécharger.');
     }
 }

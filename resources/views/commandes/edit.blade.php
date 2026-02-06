@@ -49,7 +49,7 @@
                         <select class="form-select" name="produits[{{ $index }}][id]" required>
                             @foreach($produits as $p)
                                 <option value="{{ $p->id }}" {{ $produit->id == $p->id ? 'selected' : '' }}>
-                                    {{ $p->designation }} ({{ number_format($p->prix, 2) }} €)
+                                    {{ $p->designation }} ({{ number_format($p->prix, 2) }} DH)
                                 </option>
                             @endforeach
                         </select>
@@ -82,26 +82,26 @@
         function addProduit() {
             const container = document.getElementById('produits-container');
             const html = `
-            <div class="row mb-2 produit-row">
-                <div class="col-md-5">
-                    <select class="form-select" name="produits[${produitIndex}][id]" required>
-                        <option value="">Sélectionner un produit</option>
-                        @foreach($produits as $produit)
-                            <option value="{{ $produit->id }}">{{ $produit->designation }} ({{ number_format($produit->prix, 2) }} €)</option>
-                        @endforeach
-                    </select>
+                <div class="row mb-2 produit-row">
+                    <div class="col-md-5">
+                        <select class="form-select" name="produits[${produitIndex}][id]" required>
+                            <option value="">Sélectionner un produit</option>
+                            @foreach($produits as $produit)
+                                <option value="{{ $produit->id }}">{{ $produit->designation }} ({{ number_format($produit->prix, 2) }} DH)</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="produits[${produitIndex}][quantite]" min="1" value="1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" step="0.01" class="form-control" name="produits[${produitIndex}][prix]" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger" onclick="this.closest('.produit-row').remove()">X</button>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <input type="number" class="form-control" name="produits[${produitIndex}][quantite]" min="1" value="1" required>
-                </div>
-                <div class="col-md-3">
-                    <input type="number" step="0.01" class="form-control" name="produits[${produitIndex}][prix]" required>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger" onclick="this.closest('.produit-row').remove()">X</button>
-                </div>
-            </div>
-        `;
+            `;
             container.insertAdjacentHTML('beforeend', html);
             produitIndex++;
         }
